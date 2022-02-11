@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Task from './Task';
+import { useDispatch, useSelector } from "react-redux";
+import { updateTaskState } from "../lib/redux";
 
-export default function TaskList({ loading, tasks, onPinTask, onArchiveTask }) {
+export function PureTaskList({ loading, tasks, onPinTask, onArchiveTask }) {
   // Task 애 중요 표시(pinned) 를 하거나, 완료 표시(archive) 를 하는 event
   const events = {
     onPinTask,
@@ -65,18 +67,43 @@ export default function TaskList({ loading, tasks, onPinTask, onArchiveTask }) {
 }
 
 
-TaskList.propTypes = {
+PureTaskList.propTypes = {
   // Loading 상태는 불린 타입
   loading: PropTypes.bool,
-  // Task 들은 Task.js 의 배열 형태로 받으며 필수로 필요하다.
+  // Task 들은 Task.js 의 배열 형태로 받으며 반드시 필요하다.
   tasks: PropTypes.arrayOf(Task.propTypes.task).isRequired,
-  // Pinned 상태로 바꿔주는 함수(아벤트)
-  onPinTask: PropTypes.func,
-  // Archive 상태로 바꿔주는 함수(아벤트)
-  onArchiveTask: PropTypes.func,
+  // Pinned 상태로 바꿔주는 함수(아벤트) 반드시 필요하다.
+  onPinTask: PropTypes.func.isRequired,
+  // Archive 상태로 바꿔주는 함수(아벤트) 반드시 필요하다.
+  onArchiveTask: PropTypes.func.isRequired,
 };
 
 // loading 의 기본 상태는 False 이다.
-TaskList.defaultProps = {
+PureTaskList.defaultProps = {
   loading: false,
 };
+
+// redux store 에 있는 state 를 useSelector 로 불러오고
+// useDispatch 를 통해 store 에 있는 updateTaskState action 을 불러와 pinTask, archiveTask 이벤트를 각각 만듦
+export function TaskList() {
+  const tasks = useSelector((state) => state.tasks);
+  const dispatch = useDispatch();
+
+  const pinTask = (value) => {
+    dispatch(updateTaskState({ id: value, newTaskState: "TASK_PINNED" }));
+  };
+  const archiveTask = (value) => {
+    dispatch(updateTaskState({ id: value, newTaskState: "TASK_ARCHIVED" }));
+  };
+
+  const filteredTasks = tasks.filter(
+    (t) => t.state === "TASK_INBOX" || t.state === "TASK_PINNED"
+  );
+  return (
+    <PureTaskList
+      tasks={filteredTasks}
+      onPinTask={(task) => pinTask(task)}
+      onArchiveTask={(task) => archiveTask(task)}
+    />
+  );
+}
