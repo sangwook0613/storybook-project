@@ -12,12 +12,12 @@ export default function Task({ task: { id, title, state }, onArchiveTask, onPinT
           disabled={true}
           name="checked"
         />
-        <span className="checkbox-custom" onClick={() => onArchiveTask(id)} />
+        <span className="checkbox-custom" onClick={() => onArchiveTask(id)} id={`archiveTask-${id}`} aria-label={`archiveTask-${id}`} />
       </label>
 
       {/* Task 내용 들어갈 input */}
       <div className="title">
-        <input type="text" value={title} readOnly={true} placeholder="Input title" />
+        <input type="text" value={title} readOnly={true} placeholder="Input title" style={{ textOverflow: "ellipsis" }}/>
       </div>
 
       {/* 중요한 Task 체크하는 파트 */}
@@ -25,7 +25,11 @@ export default function Task({ task: { id, title, state }, onArchiveTask, onPinT
         {state !== 'TASK_ARCHIVED' && (
           // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a onClick={() => onPinTask(id)}>
-            <span className={`icon-star`} />
+            <span 
+              className={`icon-star`} 
+              id={`pinTask-${id}`}
+              aria-label={`pinTask-${id}`}
+            />
           </a>
         )}
       </div>
